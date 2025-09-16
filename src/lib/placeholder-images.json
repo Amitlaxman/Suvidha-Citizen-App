@@ -1,3 +1,35 @@
+
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "pothole-1",
+      "description": "A large pothole on a busy street",
+      "imageUrl": "https://picsum.photos/seed/pothole1/600/400",
+      "imageHint": "pothole road"
+    },
+    {
+      "id": "waste-1",
+      "description": "Overflowing trash can on a sidewalk",
+      "imageUrl": "https://picsum.photos/seed/waste1/600/400",
+      "imageHint": "garbage trash"
+    },
+    {
+      "id": "streetlight-1",
+      "description": "A broken streetlight in a residential area at night",
+      "imageUrl": "https://picsum.photos/seed/light1/600/400",
+      "imageHint": "broken streetlight"
+    },
+    {
+      "id": "water-1",
+      "description": "Leaking water pipe on the side of the road",
+      "imageUrl": "https://picsum.photos/seed/water1/600/400",
+      "imageHint": "water leak"
+    },
+    {
+      "id": "transport-1",
+      "description": "Graffiti on a public bus stop shelter",
+      "imageUrl": "https://picsum.photos/seed/transport1/600/400",
+      "imageHint": "bus stop"
+    }
+  ]
 }
