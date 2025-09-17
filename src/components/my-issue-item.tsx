@@ -1,8 +1,23 @@
 import type { Issue, IssueStatus } from "@/lib/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, CircleDot, FileText, Wrench } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CheckCircle2, CircleDot, FileText, Wrench, Trash2, Loader2, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { deleteIssue } from "@/app/actions";
+import { useToast } from "@/hooks/use-toast";
+import { useState, useTransition } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 type MyIssueItemProps = {
   issue: Issue;
@@ -15,62 +30,101 @@ const statusIcons: Record<IssueStatus, React.ElementType> = {
     Resolved: CheckCircle2,
 };
 
-const statusColors: Record<IssueStatus, string> = {
-    Submitted: "text-gray-500",
-    Acknowledged: "text-blue-500",
-    'In Progress': "text-yellow-500",
-    Resolved: "text-green-500",
-};
-
 export function MyIssueItem({ issue }: MyIssueItemProps) {
+  const { toast } = useToast();
+  const [isDeleting, startDeleteTransition] = useTransition();
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
   const currentStatusIndex = issue.updates.findIndex(update => update.status === issue.status);
+
+  const handleDelete = () => {
+    startDeleteTransition(async () => {
+        const result = await deleteIssue(issue.id);
+        if (result.success) {
+            toast({ title: "Issue Deleted", description: "Your issue report has been successfully deleted." });
+            setIsAlertOpen(false);
+        } else {
+            toast({
+                variant: "destructive",
+                title: "Deletion Failed",
+                description: result.error
+            });
+            setIsAlertOpen(false);
+        }
+    });
+  }
 
   return (
     <Card className="shadow-md">
       <CardHeader>
         <div className="flex justify-between items-start gap-2 mb-2">
             <Badge variant="secondary">{issue.category}</Badge>
-            <Badge variant="outline" className="font-mono">ID: {issue.id}</Badge>
+            <Badge variant="outline" className="font-mono text-xs">ID: {issue.id.substring(0, 8).toUpperCase()}</Badge>
         </div>
         <CardTitle className="text-lg font-headline">{issue.title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-muted-foreground mb-6 text-sm">{issue.description}</p>
         
-        <h4 className="font-semibold mb-3">Status Timeline</h4>
-        <div className="relative">
+        <h4 className="font-semibold mb-4 text-sm text-muted-foreground">Status Timeline</h4>
+        <div className="relative pl-4">
             {/* Timeline Line */}
-            <div className="absolute left-4 top-2 h-full w-0.5 bg-border -z-10" />
+            <div className="absolute left-8 top-2 h-full w-0.5 bg-border -z-10" />
 
             {issue.updates.map((update, index) => {
                 const Icon = statusIcons[update.status];
-                const isCompleted = index <= currentStatusIndex;
+                const isCurrent = issue.status === update.status;
                 
                 return (
                     <div key={index} className="flex items-start gap-4 mb-6 last:mb-0">
                          <div className={cn(
-                             "flex h-8 w-8 items-center justify-center rounded-full bg-background border-2",
-                             isCompleted ? "border-primary" : "border-border"
+                             "flex h-8 w-8 items-center justify-center rounded-full border-2 bg-background",
+                             isCurrent ? "border-primary" : "border-border"
                          )}>
-                             <Icon className={cn("h-4 w-4", isCompleted ? "text-primary" : "text-muted-foreground")} />
+                             <Icon className={cn("h-4 w-4", isCurrent ? "text-primary" : "text-muted-foreground")} />
                          </div>
                         <div className="pt-1">
                             <p className={cn(
                                 "font-semibold",
-                                isCompleted ? "text-foreground" : "text-muted-foreground"
-                            )}>{update.status}</p>
-                            <p className={cn(
-                                "text-sm",
-                                isCompleted ? "text-muted-foreground" : "text-muted-foreground/70"
+                                isCurrent ? "text-foreground" : "text-muted-foreground"
                             )}>
-                                {isCompleted ? update.description : `Updated on ${update.date}`}
+                                {update.status}
+                                {isCurrent && <Badge variant="outline" className="ml-2 text-primary border-primary">Current</Badge>}
                             </p>
+                            <p className="text-sm text-muted-foreground">
+                                {new Date(update.date).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                            </p>
+                             <p className="text-sm text-muted-foreground mt-1">{update.description}</p>
                         </div>
                     </div>
                 );
             })}
         </div>
       </CardContent>
+      <CardFooter className="bg-muted/50 p-3 flex justify-end">
+            <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+                <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm">
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete your issue
+                        report from our servers.
+                    </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+                         {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                        Continue
+                    </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+      </CardFooter>
     </Card>
   );
 }

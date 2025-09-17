@@ -17,6 +17,6 @@ export interface Issue {
   isAnonymous: boolean;
   author: string;
   authorId: string;
-  createdAt: Timestamp | string; // Firestore timestamp or string for client-side
+  createdAt: Timestamp | { seconds: number, nanoseconds: number } | string; // Accommodate different timestamp formats
   updates: { status: IssueStatus; date: string; description: string }[];
 }
