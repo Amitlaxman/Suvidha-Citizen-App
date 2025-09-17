@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -15,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { LanguageSwitcher } from "./language-switcher";
 
 export function Navbar() {
   const { user, logout, loading } = useAuth();
@@ -32,6 +34,7 @@ export function Navbar() {
             <Logo />
         </Link>
         <div className="flex items-center gap-4">
+          <LanguageSwitcher />
           {loading ? (
              <div className="h-10 w-10 rounded-full bg-muted animate-pulse" />
           ) : user ? (

@@ -1,0 +1,40 @@
+
+{
+  "appName": "Suvidha",
+  "landing": {
+    "loginButton": "Login",
+    "title": "Suvidha",
+    "subtitle": "Smart Utility for Voicing Issues, Demands, Help and Assistance.",
+    "getStartedButton": "Get Started",
+    "howItWorks": {
+      "title": "How Suvidha Works",
+      "subtitle": "A simple three-step process to make your voice heard.",
+      "step1": {
+        "title": "1. Report an Issue",
+        "description": "Snap a photo or video, add a description, and pinpoint the location of a civic problem."
+      },
+      "step2": {
+        "title": "2. Community Upvotes",
+        "description": "Fellow citizens view and upvote your report, increasing its visibility and urgency."
+      },
+      "step3": {
+        "title": "3. Get it Fixed",
+        "description": "Authorities get notified. You can track the progress and see real change happen."
+      }
+    },
+    "communityImpact": {
+      "title": "Community Impact",
+      "subtitle": "Together, we are making a tangible difference.",
+      "stat1": "Issues Resolved",
+      "stat2": "Active Citizens",
+      "stat3": "Satisfaction Rate",
+      "testimonial": {
+        "quote": "Suvidha helped resolve a long-standing water logging issue in my area within a week. It’s amazing what we can achieve together!",
+        "author": "A Happy Resident"
+      }
+    },
+    "footer": {
+      "rightsReserved": "All rights reserved."
+    }
+  }
+}

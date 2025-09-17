@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { Issue } from "@/lib/types";
@@ -32,6 +33,8 @@ export function IssueCard({ issue }: IssueCardProps) {
   const [isUpvoting, startUpvoteTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
+  
+  const displayImage = issue.mediaDataUri || issue.imageUrl;
 
   const handleUpvote = () => {
     startUpvoteTransition(async () => {
@@ -51,11 +54,11 @@ export function IssueCard({ issue }: IssueCardProps) {
 
   return (
     <Card className="overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
-      {issue.imageUrl && (
+      {displayImage && (
         <CardHeader className="p-0">
           <div className="relative aspect-video w-full">
             <Image
-              src={issue.imageUrl}
+              src={displayImage}
               alt={issue.title}
               fill
               className="object-cover"

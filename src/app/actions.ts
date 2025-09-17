@@ -27,6 +27,9 @@ export async function submitIssue(issueData: Omit<Issue, 'id' | 'createdAt' | 'u
                 { status: 'Submitted', date: new Date().toISOString(), description: `Reported by ${issueData.isAnonymous ? 'Anonymous' : issueData.author}.` }
             ]
         });
+        // Note: For production, you would upload the mediaDataUri to a storage bucket
+        // and save the URL instead of the large data URI in Firestore.
+        // For this example, we proceed with the data URI.
         return { success: true, id: docRef.id };
     } catch (error) {
         console.error('Error submitting issue:', error);

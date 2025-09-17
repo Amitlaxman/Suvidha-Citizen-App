@@ -4,7 +4,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useTransition, useState } from "react";
+import { useTransition, useState, ChangeEvent } from "react";
 import { getTagSuggestions, submitIssue } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
@@ -32,7 +32,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Wand2, MapPin, Loader2, Paperclip } from "lucide-react";
+import { Wand2, MapPin, Loader2, Paperclip, Upload, X } from "lucide-react";
+import Image from "next/image";
 
 const issueFormSchema = z.object({
   title: z.string().min(10, {
@@ -45,6 +46,7 @@ const issueFormSchema = z.object({
   severity: z.enum(["Low", "Medium", "High"]),
   location: z.string().min(2, { message: "Location is required." }),
   imageUrl: z.string().url({ message: "Please enter a valid image URL." }).optional().or(z.literal('')),
+  mediaDataUri: z.string().optional(),
   isAnonymous: z.boolean().default(false),
 });
 
@@ -61,6 +63,7 @@ const defaultValues: Partial<IssueFormValues> = {
 export function IssueForm() {
   const [isAiSuggesting, startAiSuggestionTransition] = useTransition();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
   const router = useRouter();
@@ -71,16 +74,47 @@ export function IssueForm() {
     mode: "onChange",
   });
 
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUri = reader.result as string;
+        setFilePreview(dataUri);
+        form.setValue("mediaDataUri", dataUri);
+        form.setValue("imageUrl", ""); // Clear URL if file is uploaded
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeFile = () => {
+    setFilePreview(null);
+    form.setValue("mediaDataUri", undefined);
+    // Also reset the file input itself if possible, for better UX
+    const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
   async function onSubmit(data: IssueFormValues) {
     if (!user) {
         toast({ variant: "destructive", title: "Authentication Error", description: "You must be logged in to report an issue."});
         return;
     }
 
+    if (!data.imageUrl && !data.mediaDataUri) {
+       toast({ variant: "destructive", title: "Missing Image", description: "Please provide an image URL or upload an image."});
+       return;
+    }
+
     setIsSubmitting(true);
     
+    // We prefer the uploaded media if both are present
     const issuePayload = {
         ...data,
+        imageUrl: data.mediaDataUri ? '' : data.imageUrl, // Prioritize data URI, clear URL
         author: user.displayName || user.email || 'Unknown User',
         authorId: user.uid,
     };
@@ -95,6 +129,7 @@ export function IssueForm() {
             description: `Thank you for your report. Your Problem ID is #${result.id?.substring(0, 6).toUpperCase()}.`,
         });
         form.reset();
+        setFilePreview(null);
         router.push('/home');
     } else {
          toast({
@@ -117,7 +152,7 @@ export function IssueForm() {
       return;
     }
     startAiSuggestionTransition(async () => {
-      const result = await getTagSuggestions({ title, description });
+      const result = await getTagSuggestions({ title, description, mediaDataUri: form.getValues("mediaDataUri") });
       if (result.success && result.data) {
         const { category, severity } = result.data;
         // This is a simple mapping. A real app might need more robust logic.
@@ -279,25 +314,72 @@ export function IssueForm() {
                     </FormItem>
                   )}
                 />
-                 <FormField
-                  control={form.control}
-                  name="imageUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Attach Photo (URL)</FormLabel>
-                      <FormControl>
-                         <div className="relative">
-                            <Input type="text" placeholder="https://example.com/image.jpg" className="pl-12" {...field} />
-                             <Paperclip className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        </div>
-                      </FormControl>
-                       <FormDescription>
-                        A picture is worth a thousand words. Paste the URL of an image.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                 
+                 {filePreview ? (
+                   <div className="space-y-2">
+                      <FormLabel>Image Preview</FormLabel>
+                      <div className="relative w-full aspect-video rounded-md overflow-hidden border">
+                         <Image src={filePreview} alt="Preview" fill className="object-cover"/>
+                         <Button
+                           type="button"
+                           variant="destructive"
+                           size="icon"
+                           className="absolute top-2 right-2 h-7 w-7"
+                           onClick={removeFile}
+                          >
+                           <X className="h-4 w-4" />
+                         </Button>
+                      </div>
+                   </div>
+                 ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+                      <FormField
+                          control={form.control}
+                          name="imageUrl"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Attach Photo (URL)</FormLabel>
+                              <FormControl>
+                                <div className="relative">
+                                    <Input type="text" placeholder="https://example.com/image.jpg" className="pl-12" {...field} onChange={(e) => {
+                                      field.onChange(e);
+                                      form.setValue("mediaDataUri", undefined);
+                                    }}/>
+                                    <Paperclip className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <span className="text-sm text-muted-foreground">OR</span>
+                        <FormField
+                            control={form.control}
+                            name="mediaDataUri"
+                            render={() => (
+                                <FormItem>
+                                <FormControl>
+                                  <Button asChild variant="outline">
+                                    <label htmlFor="file-upload" className="cursor-pointer">
+                                      <Upload className="mr-2 h-4 w-4"/>
+                                      Upload from Device
+                                    </label>
+                                  </Button>
+                                </FormControl>
+                                <Input id="file-upload" type="file" accept="image/*,video/*" className="hidden" onChange={handleFileChange} />
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                            />
+                      </div>
+                    </div>
+                 )}
+
+                 <FormDescription>
+                    A picture is worth a thousand words. Provide a URL or upload a file.
+                </FormDescription>
              </div>
             
             <Separator />
@@ -333,5 +415,3 @@ export function IssueForm() {
     </Card>
   );
 }
-
-    

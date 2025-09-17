@@ -1,8 +1,10 @@
+
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/toaster";
 import { BottomNav } from "@/components/bottom-nav";
 import { Navbar } from "@/components/navbar";
 import { AuthProvider } from "@/hooks/use-auth";
+import { LanguageProvider } from "@/hooks/use-translation";
 import "./globals.css";
 
 
@@ -27,14 +29,16 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased bg-background">
-        <AuthProvider>
-          <div className="relative flex min-h-screen w-full flex-col">
-            <Navbar />
-            <main className="flex-1 pt-16 pb-24">{children}</main>
-            <BottomNav />
-          </div>
-          <Toaster />
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <div className="relative flex min-h-screen w-full flex-col">
+              <Navbar />
+              <main className="flex-1 pt-16 pb-24">{children}</main>
+              <BottomNav />
+            </div>
+            <Toaster />
+          </AuthProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

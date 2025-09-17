@@ -1,3 +1,4 @@
+
 import type { Timestamp } from 'firebase/firestore';
 
 export type IssueStatus = 'Submitted' | 'Acknowledged' | 'In Progress' | 'Resolved';
@@ -12,6 +13,7 @@ export interface Issue {
   severity: IssueSeverity;
   location: string;
   imageUrl?: string;
+  mediaDataUri?: string; // For uploaded files
   upvotes: number;
   status: IssueStatus;
   isAnonymous: boolean;
