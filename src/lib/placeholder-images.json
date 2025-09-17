@@ -10,7 +10,7 @@
     {
       "id": "waste-1",
       "description": "Overflowing trash can on a sidewalk",
-      "imageUrl": "https://picsum.photos/seed/waste1/600/400",
+      "imageUrl": "https://picsum.photos/id/34/600/400",
       "imageHint": "garbage trash"
     },
     {
@@ -22,13 +22,13 @@
     {
       "id": "water-1",
       "description": "Leaking water pipe on the side of the road",
-      "imageUrl": "https://picsum.photos/seed/water1/600/400",
+      "imageUrl": "https://picsum.photos/id/217/600/400",
       "imageHint": "water leak"
     },
     {
       "id": "transport-1",
       "description": "Graffiti on a public bus stop shelter",
-      "imageUrl": "https://picsum.photos/seed/transport1/600/400",
+      "imageUrl": "https://picsum.photos/id/132/600/400",
       "imageHint": "bus stop"
     }
   ]
