@@ -71,7 +71,7 @@ export function MyIssueItem({ issue }: MyIssueItemProps) {
             <div className="absolute left-8 top-2 h-full w-0.5 bg-border -z-10" />
 
             {issue.updates.map((update, index) => {
-                const Icon = statusIcons[update.status];
+                const Icon = statusIcons[update.status] || AlertTriangle;
                 const isCurrent = issue.status === update.status;
                 
                 return (
