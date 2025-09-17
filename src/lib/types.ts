@@ -1,3 +1,5 @@
+import type { Timestamp } from 'firebase/firestore';
+
 export type IssueStatus = 'Submitted' | 'Acknowledged' | 'In Progress' | 'Resolved';
 export type IssueSeverity = 'Low' | 'Medium' | 'High';
 export type IssueCategory = 'Roads' | 'Water Supply' | 'Electricity' | 'Waste Management' | 'Public Transport' | 'Other';
@@ -14,6 +16,7 @@ export interface Issue {
   status: IssueStatus;
   isAnonymous: boolean;
   author: string;
-  createdAt: string;
+  authorId: string;
+  createdAt: Timestamp | string; // Firestore timestamp or string for client-side
   updates: { status: IssueStatus; date: string; description: string }[];
 }

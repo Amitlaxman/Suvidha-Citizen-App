@@ -24,6 +24,7 @@ export function IssueCard({ issue }: IssueCardProps) {
   const [isUpvoted, setIsUpvoted] = useState(false);
 
   const handleUpvote = () => {
+    // In a real app, this would be an API call to update the database
     if (isUpvoted) {
       setUpvotes(upvotes - 1);
     } else {
@@ -35,7 +36,7 @@ export function IssueCard({ issue }: IssueCardProps) {
   return (
     <Card className="overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
       <CardHeader className="p-0">
-        {issue.imageUrl && (
+        {issue.imageUrl ? (
             <div className="relative aspect-video w-full">
                 <Image
                     src={issue.imageUrl}
@@ -44,6 +45,10 @@ export function IssueCard({ issue }: IssueCardProps) {
                     className="object-cover"
                 />
             </div>
+        ) : (
+          <div className="relative aspect-video w-full bg-muted flex items-center justify-center">
+            <span className="text-muted-foreground text-sm">No Image Provided</span>
+          </div>
         )}
       </CardHeader>
       <CardContent className="p-4">

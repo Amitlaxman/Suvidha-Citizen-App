@@ -3,9 +3,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useTransition } from "react";
-import { getTagSuggestions } from "@/app/actions";
+import { useTransition, useState } from "react";
+import { getTagSuggestions, submitIssue } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -41,7 +43,7 @@ const issueFormSchema = z.object({
   category: z.enum(["Roads", "Water Supply", "Electricity", "Waste Management", "Public Transport", "Other"]),
   severity: z.enum(["Low", "Medium", "High"]),
   location: z.string().min(2, { message: "Location is required." }),
-  media: z.any().optional(),
+  imageUrl: z.string().url({ message: "Please enter a valid image URL." }).optional().or(z.literal('')),
   isAnonymous: z.boolean().default(false),
 });
 
@@ -49,11 +51,15 @@ type IssueFormValues = z.infer<typeof issueFormSchema>;
 
 const defaultValues: Partial<IssueFormValues> = {
   isAnonymous: false,
+  imageUrl: "",
 };
 
 export function IssueForm() {
-  const [isPending, startTransition] = useTransition();
+  const [isAiSuggesting, startAiSuggestionTransition] = useTransition();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
+  const router = useRouter();
 
   const form = useForm<IssueFormValues>({
     resolver: zodResolver(issueFormSchema),
@@ -61,13 +67,38 @@ export function IssueForm() {
     mode: "onChange",
   });
 
-  function onSubmit(data: IssueFormValues) {
-    console.log(data);
-    toast({
-      title: "Issue Submitted!",
-      description: "Thank you for your report. Your Problem ID is #12345.",
-    });
-    form.reset();
+  async function onSubmit(data: IssueFormValues) {
+    if (!user) {
+        toast({ variant: "destructive", title: "Authentication Error", description: "You must be logged in to report an issue."});
+        return;
+    }
+
+    setIsSubmitting(true);
+    
+    const issuePayload = {
+        ...data,
+        author: user.displayName || user.email || 'Unknown User',
+        authorId: user.uid,
+    };
+
+    const result = await submitIssue(issuePayload);
+
+    setIsSubmitting(false);
+
+    if (result.success) {
+        toast({
+            title: "Issue Submitted!",
+            description: `Thank you for your report. Your Problem ID is #${result.id?.substring(0, 6).toUpperCase()}.`,
+        });
+        form.reset();
+        router.push('/home');
+    } else {
+         toast({
+            variant: "destructive",
+            title: "Submission Failed",
+            description: result.error,
+        });
+    }
   }
 
   const handleSuggestTags = () => {
@@ -81,7 +112,7 @@ export function IssueForm() {
       });
       return;
     }
-    startTransition(async () => {
+    startAiSuggestionTransition(async () => {
       const result = await getTagSuggestions({ title, description });
       if (result.success && result.data) {
         const { category, severity } = result.data;
@@ -164,8 +195,8 @@ export function IssueForm() {
             <div className="space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <h3 className="text-lg font-semibold">Issue Details</h3>
-                   <Button type="button" size="sm" onClick={handleSuggestTags} disabled={isPending}>
-                    {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                   <Button type="button" size="sm" onClick={handleSuggestTags} disabled={isAiSuggesting}>
+                    {isAiSuggesting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
                     Suggest Tags with AI
                   </Button>
                 </div>
@@ -246,18 +277,18 @@ export function IssueForm() {
                 />
                  <FormField
                   control={form.control}
-                  name="media"
+                  name="imageUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Attach Photo/Video</FormLabel>
+                      <FormLabel>Attach Photo (URL)</FormLabel>
                       <FormControl>
                          <div className="relative">
-                            <Input type="file" className="pl-12" {...field} />
+                            <Input type="text" placeholder="https://example.com/image.jpg" className="pl-12" {...field} />
                              <Paperclip className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                         </div>
                       </FormControl>
                        <FormDescription>
-                        A picture is worth a thousand words. Attach relevant media.
+                        A picture is worth a thousand words. Paste the URL of an image.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -288,7 +319,10 @@ export function IssueForm() {
                 )}
                 />
             
-            <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">Submit Issue</Button>
+            <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" disabled={isSubmitting}>
+              {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              {isSubmitting ? "Submitting..." : "Submit Issue"}
+            </Button>
           </form>
         </Form>
       </CardContent>
