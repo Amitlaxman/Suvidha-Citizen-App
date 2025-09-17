@@ -10,7 +10,7 @@ export function Logo({ className }: LogoProps) {
     <div className={cn("flex items-center gap-2", className)}>
       <Megaphone className="h-8 w-8 text-primary" />
       <span className="text-2xl font-bold font-headline text-foreground">
-        Sudhaaro
+        Suvidha
       </span>
     </div>
   );

@@ -3,11 +3,10 @@
 import type { Issue } from "@/lib/types";
 import { useState } from "react";
 import Image from "next/image";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ThumbsUp, MapPin } from "lucide-react";
+import { ArrowUp, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type IssueCardProps = {
@@ -33,19 +32,16 @@ export function IssueCard({ issue }: IssueCardProps) {
     setIsUpvoted(!isUpvoted);
   };
 
-  const placeholder = PlaceHolderImages.find((p) => p.id === issue.imageId);
-
   return (
     <Card className="overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
       <CardHeader className="p-0">
-        {placeholder && (
+        {issue.imageUrl && (
             <div className="relative aspect-video w-full">
                 <Image
-                    src={placeholder.imageUrl}
-                    alt={placeholder.description}
+                    src={issue.imageUrl}
+                    alt={issue.title}
                     fill
                     className="object-cover"
-                    data-ai-hint={placeholder.imageHint}
                 />
             </div>
         )}
@@ -71,7 +67,7 @@ export function IssueCard({ issue }: IssueCardProps) {
           onClick={handleUpvote}
           className="transition-all duration-200"
         >
-          <ThumbsUp className={cn("h-4 w-4 mr-2 transition-transform", isUpvoted && "scale-110 -rotate-6")} />
+          <ArrowUp className={cn("h-4 w-4 mr-2 transition-transform", isUpvoted && "scale-110")} />
           <span className="font-bold">{upvotes}</span>
         </Button>
       </CardFooter>

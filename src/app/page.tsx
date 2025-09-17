@@ -1,85 +1,43 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
-import { issues } from "@/lib/data";
-import { IssueCard } from "@/components/issue-card";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { List, Map, Search } from "lucide-react";
 import { Logo } from "@/components/logo";
+import Link from "next/link";
+import Image from "next/image";
 
-export default function Home() {
-  const [view, setView] = useState("list"); // 'list' or 'map'
-
+export default function LandingPage() {
   return (
-    <div className="container mx-auto max-w-3xl px-4 py-6">
-      <header className="flex items-center justify-between">
+    <div className="flex flex-col min-h-screen">
+      <header className="container mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
         <Logo />
       </header>
-      
-      <div className="my-6 space-y-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input placeholder="Search by keyword or location..." className="pl-10" />
-        </div>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Select defaultValue="newest">
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest</SelectItem>
-              <SelectItem value="severity">Most Severe</SelectItem>
-              <SelectItem value="upvotes">Most Upvoted</SelectItem>
-              <SelectItem value="resolved">Resolved</SelectItem>
-              <SelectItem value="unresolved">Unresolved</SelectItem>
-            </SelectContent>
-          </Select>
-          <div className="flex-grow" />
-          <div className="flex items-center gap-2 rounded-md bg-muted p-1">
-            <Button
-              variant={view === "list" ? "secondary" : "ghost"}
-              size="sm"
-              className="w-full"
-              onClick={() => setView("list")}
-            >
-              <List className="mr-2 h-4 w-4" />
-              List
-            </Button>
-            <Button
-              variant={view === "map" ? "secondary" : "ghost"}
-              size="sm"
-              className="w-full"
-              onClick={() => setView("map")}
-            >
-              <Map className="mr-2 h-4 w-4" />
-              Map
-            </Button>
+      <main className="flex-1 flex items-center justify-center">
+        <div className="container mx-auto max-w-5xl px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div className="text-center md:text-left">
+              <h1 className="text-4xl md:text-5xl font-bold font-headline mb-4 leading-tight">
+                Suvidha
+              </h1>
+              <p className="text-lg md:text-xl text-muted-foreground mb-8">
+                Smart Utility for Voicing Issues, Demands, Help and Assistance.
+              </p>
+              <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
+                <Link href="/home">Get Started</Link>
+              </Button>
+            </div>
+            <div>
+              <Image
+                src="https://picsum.photos/seed/community/600/400"
+                alt="Community illustration"
+                width={600}
+                height={400}
+                className="rounded-lg shadow-xl"
+                data-ai-hint="community people"
+              />
+            </div>
           </div>
         </div>
-      </div>
-
-      {view === "list" ? (
-        <div className="space-y-4">
-          {issues.map((issue) => (
-            <IssueCard key={issue.id} issue={issue} />
-          ))}
-        </div>
-      ) : (
-        <div className="aspect-video w-full overflow-hidden rounded-lg border-2 border-dashed bg-card flex flex-col items-center justify-center text-center text-muted-foreground shadow-inner">
-           <Map className="h-12 w-12 mb-4" />
-          <h3 className="text-lg font-semibold">Map View</h3>
-          <p className="text-sm">Interactive map feature is coming soon.</p>
-        </div>
-      )}
+      </main>
     </div>
   );
 }
