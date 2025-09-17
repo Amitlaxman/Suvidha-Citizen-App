@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -50,8 +51,11 @@ const issueFormSchema = z.object({
 type IssueFormValues = z.infer<typeof issueFormSchema>;
 
 const defaultValues: Partial<IssueFormValues> = {
-  isAnonymous: false,
+  title: "",
+  description: "",
+  location: "",
   imageUrl: "",
+  isAnonymous: false,
 };
 
 export function IssueForm() {
@@ -329,3 +333,5 @@ export function IssueForm() {
     </Card>
   );
 }
+
+    
