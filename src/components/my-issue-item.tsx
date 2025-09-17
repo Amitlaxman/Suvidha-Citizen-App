@@ -1,3 +1,4 @@
+
 import type { Issue, IssueStatus } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -82,13 +83,13 @@ export function MyIssueItem({ issue }: MyIssueItemProps) {
                              <Icon className={cn("h-4 w-4", isCurrent ? "text-primary" : "text-muted-foreground")} />
                          </div>
                         <div className="pt-1">
-                            <p className={cn(
-                                "font-semibold",
+                            <div className={cn(
+                                "font-semibold flex items-center",
                                 isCurrent ? "text-foreground" : "text-muted-foreground"
                             )}>
                                 {update.status}
                                 {isCurrent && <Badge variant="outline" className="ml-2 text-primary border-primary">Current</Badge>}
-                            </p>
+                            </div>
                             <p className="text-sm text-muted-foreground">
                                 {new Date(update.date).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
                             </p>
