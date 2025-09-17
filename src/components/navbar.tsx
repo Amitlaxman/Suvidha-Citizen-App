@@ -21,6 +21,7 @@ export function Navbar() {
   const { user, logout, loading } = useAuth();
   const pathname = usePathname();
 
+  // Hide nav on landing, login, and signup pages
   if (pathname === '/' || pathname === '/login' || pathname === '/signup') {
     return null;
   }

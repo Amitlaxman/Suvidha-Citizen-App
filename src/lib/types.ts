@@ -9,7 +9,7 @@ export interface Issue {
   category: IssueCategory;
   severity: IssueSeverity;
   location: string;
-  imageUrl?: string; // Changed from imageId and made optional
+  imageUrl?: string;
   upvotes: number;
   status: IssueStatus;
   isAnonymous: boolean;

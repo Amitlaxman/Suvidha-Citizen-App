@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, PlusSquare, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
 
 const navItems = [
   { href: "/home", label: "Home Feed", icon: Home },
@@ -13,8 +14,10 @@ const navItems = [
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { user } = useAuth();
 
-  if (pathname === '/') {
+  // Hide nav on landing, login, and signup pages, or if user is not logged in
+  if (pathname === '/' || pathname === '/login' || pathname === '/signup' || !user) {
     return null;
   }
 
